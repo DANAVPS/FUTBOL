@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema Fútbol</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-custom {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .dashboard-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-title {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            font-size: 2.5rem;
+        }
+
+        /* Estadísticas Cards */
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .stat-card i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .stat-card h4 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .stat-card p {
+            margin: 0;
+            font-size: 1rem;
+            opacity: 0.95;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .stat-card.asociaciones {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stat-card.clubes {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .stat-card.jugadores {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card.entrenadores {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .stat-card.competiciones {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        /* Cards de Contenido */
+        .card-custom {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            transition: all 0.3s ease;
+            background: white;
+            overflow: hidden;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+        }
+
+        .card-header {
+            border: none;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .competicion-card {
+            border-left: 5px solid #3498db;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background: linear-gradient(to right, rgba(52, 152, 219, 0.05), white);
+        }
+
+        .competicion-card:hover {
+            border-left-width: 8px;
+            background: linear-gradient(to right, rgba(52, 152, 219, 0.1), white);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+        }
+
+        .club-card {
+            border-left: 5px solid #27ae60;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background: linear-gradient(to right, rgba(39, 174, 96, 0.05), white);
+            height: 100%;
+        }
+
+        .club-card:hover {
+            border-left-width: 8px;
+            background: linear-gradient(to right, rgba(39, 174, 96, 0.1), white);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        /* Badge personalizado */
+        .badge-custom {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Animaciones de entrada */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #95a5a6;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Progress Bar */
+        .progress-bar-custom {
+            height: 8px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar-custom::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            margin-top: 4rem;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Contador animado */
+        .counter {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        /* Tooltip mejorado */
+        .tooltip-custom {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip-custom:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            white-space: nowrap;
+            font-size: 0.875rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="fas fa-futbol me-2"></i>Sistema de Fútbol
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link active" th:href="@{/}">
+                    <i class="fas fa-home me-1"></i>Inicio
+                </a>
+                <a class="nav-link" th:href="@{/asociaciones}">
+                    <i class="fas fa-flag me-1"></i>Asociaciones
+                </a>
+                <a class="nav-link" th:href="@{/clubes}">
+                    <i class="fas fa-shield-alt me-1"></i>Clubes
+                </a>
+                <a class="nav-link" th:href="@{/jugadores}">
+                    <i class="fas fa-running me-1"></i>Jugadores
+                </a>
+                <a class="nav-link" th:href="@{/entrenadores}">
+                    <i class="fas fa-whistle me-1"></i>Entrenadores
+                </a>
+                <a class="nav-link" th:href="@{/competiciones}">
+                    <i class="fas fa-trophy me-1"></i>Competiciones
+                </a>
+                <a class="nav-link" th:href="@{/h2-console}" target="_blank">
+                    <i class="fas fa-database me-1"></i>Base de Datos
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Header del Dashboard -->
+        <div class="dashboard-header fade-in">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="dashboard-title mb-2">
+                        <i class="fas fa-chart-line me-3"></i>Dashboard del Sistema
+                    </h1>
+                    <p class="text-muted fs-5 mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Estadísticas y resumen general del sistema de fútbol
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="text-muted">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        <span id="currentDate"></span>
+                    </div>
+                    <div class="text-muted mt-1">
+                        <i class="fas fa-clock me-2"></i>
+                        <span id="currentTime"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas Rápidas -->
+        <div class="row mb-4">
+            <div class="col-md-2 col-6">
+                <div class="stat-card asociaciones fade-in tooltip-custom" 
+                     data-tooltip="Total de asociaciones registradas"
+                     style="animation-delay: 0.1s;">
+                    <i class="fas fa-flag"></i>
+                    <h4 class="counter" th:attr="data-target=${estadisticas.asociaciones}" th:text="${estadisticas.asociaciones}">0</h4>
+                    <p>Asociaciones</p>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="stat-card clubes fade-in tooltip-custom" 
+                     data-tooltip="Total de clubes registrados"
+                     style="animation-delay: 0.2s;">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4 class="counter" th:attr="data-target=${estadisticas.clubes}" th:text="${estadisticas.clubes}">0</h4>
+                    <p>Clubes</p>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="stat-card jugadores fade-in tooltip-custom" 
+                     data-tooltip="Total de jugadores activos"
+                     style="animation-delay: 0.3s;">
+                    <i class="fas fa-running"></i>
+                    <h4 class="counter" th:attr="data-target=${estadisticas.jugadores}" th:text="${estadisticas.jugadores}">0</h4>
+                    <p>Jugadores</p>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="stat-card entrenadores fade-in tooltip-custom" 
+                     data-tooltip="Total de entrenadores registrados"
+                     style="animation-delay: 0.4s;">
+                    <i class="fas fa-whistle"></i>
+                    <h4 class="counter" th:attr="data-target=${estadisticas.entrenadores}" th:text="${estadisticas.entrenadores}">0</h4>
+                    <p>Entrenadores</p>
+                </div>
+            </div>
+            <div class="col-md-2 col-6">
+                <div class="stat-card competiciones fade-in tooltip-custom" 
+                     data-tooltip="Total de competiciones programadas"
+                     style="animation-delay: 0.5s;">
+                    <i class="fas fa-trophy"></i>
+                    <h4 class="counter" th:attr="data-target=${estadisticas.competiciones}" th:text="${estadisticas.competiciones}">0</h4>
+                    <p>Competiciones</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Competiciones Activas -->
+            <div class="col-md-6 mb-4">
+                <div class="card-custom fade-in" style="animation-delay: 0.6s;">
+                    <div class="card-header bg-primary text-white">
+                        <h5>
+                            <i class="fas fa-play-circle me-2"></i>
+                            Competiciones Activas
+                            <span class="badge bg-light text-primary float-end" 
+                                  th:text="${competicionesActivas != null ? competicionesActivas.size() : 0}">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                        <div th:if="${competicionesActivas == null or competicionesActivas.empty}" 
+                             class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p class="mb-0">No hay competiciones activas</p>
+                        </div>
+                        <div th:each="competicion, iterStat : ${competicionesActivas}" 
+                             class="card competicion-card mb-3"
+                             th:style="'animation-delay: ' + ${0.1 * iterStat.index} + 's;'">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="card-title mb-2">
+                                            <i class="fas fa-trophy text-primary me-2"></i>
+                                            <span th:text="${competicion.nombre}">Nombre Competición</span>
+                                        </h6>
+                                        <p class="card-text mb-1">
+                                            <i class="fas fa-dollar-sign text-success me-2"></i>
+                                            <strong>Premio:</strong> 
+                                            <span class="badge-custom bg-success text-white">
+                                                $<span th:text="${#numbers.formatInteger(competicion.montoPremio, 0, 'COMMA')}">0</span>
+                                            </span>
+                                        </p>
+                                        <p class="card-text small text-muted mb-0">
+                                            <i class="fas fa-calendar-alt me-2"></i>
+                                            <span th:text="${#temporals.format(competicion.fechaInicio, 'dd/MM/yyyy')}">01/01/2024</span> - 
+                                            <span th:text="${#temporals.format(competicion.fechaFin, 'dd/MM/yyyy')}">31/12/2024</span>
+                                        </p>
+                                    </div>
+                                    <span class="badge bg-success badge-custom">
+                                        <i class="fas fa-play me-1"></i>Activa
+                                    </span>
+                                </div>
+                                <div class="progress-bar-custom mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Competiciones por Premio -->
+            <div class="col-md-6 mb-4">
+                <div class="card-custom fade-in" style="animation-delay: 0.7s;">
+                    <div class="card-header bg-warning text-dark">
+                        <h5>
+                            <i class="fas fa-medal me-2"></i>
+                            Ranking por Premio
+                            <span class="badge bg-dark float-end" 
+                                  th:text="${competicionesPremio != null ? competicionesPremio.size() : 0}">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                        <div th:if="${competicionesPremio == null or competicionesPremio.empty}" 
+                             class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p class="mb-0">No hay competiciones registradas</p>
+                        </div>
+                        <div th:each="competicion, iterStat : ${competicionesPremio}" 
+                             class="card mb-3"
+                             th:style="'animation-delay: ' + ${0.1 * iterStat.index} + 's;'">
+                            <div class="card-body py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <span class="badge bg-warning text-dark" 
+                                                  style="font-size: 1.2rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                                                <span th:text="${iterStat.index + 1}">1</span>
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0" th:text="${competicion.nombre}">Nombre Competición</h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar me-1"></i>
+                                                <span th:text="${#temporals.format(competicion.fechaInicio, 'dd/MM/yyyy')}">01/01/2024</span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <span class="badge-custom bg-success text-white">
+                                        <i class="fas fa-dollar-sign me-1"></i>
+                                        $<span th:text="${#numbers.formatInteger(competicion.montoPremio, 0, 'COMMA')}">0</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clubes Registrados -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card-custom fade-in" style="animation-delay: 0.8s;">
+                    <div class="card-header bg-success text-white">
+                        <h5>
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Clubes Registrados
+                            <span class="badge bg-light text-success float-end" 
+                                  th:text="${clubes != null ? clubes.size() : 0}">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${clubes == null or clubes.empty}" 
+                             class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p class="mb-0">No hay clubes registrados</p>
+                        </div>
+                        <div class="row">
+                            <div th:each="club, iterStat : ${clubes}" 
+                                 class="col-md-4 col-lg-3 mb-4">
+                                <div class="card club-card"
+                                     th:style="'animation-delay: ' + ${0.1 * iterStat.index} + 's;'">
+                                    <div class="card-body">
+                                        <div class="text-center mb-3">
+                                            <div style="width: 60px; height: 60px; margin: 0 auto; background: linear-gradient(135deg, #27ae60, #2ecc71); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-shield-alt fa-2x text-white"></i>
+                                            </div>
+                                        </div>
+                                        <h6 class="card-title text-center mb-3" th:text="${club.nombre}">Nombre Club</h6>
+                                        <div class="mb-2">
+                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                            <small><strong>Ciudad:</strong> <span th:text="${club.ciudad}">Ciudad</span></small>
+                                        </div>
+                                        <div class="mb-2">
+                                            <i class="fas fa-calendar text-muted me-2"></i>
+                                            <small><strong>Fundación:</strong> <span th:text="${club.anioFundacion}">2000</span></small>
+                                        </div>
+                                        <div class="mb-3" th:if="${club.entrenador != null}">
+                                            <i class="fas fa-user-tie text-muted me-2"></i>
+                                            <small>
+                                                <strong>Entrenador:</strong><br>
+                                                <span th:text="${club.entrenador.nombre + ' ' + club.entrenador.apellido}">Entrenador</span>
+                                            </small>
+                                        </div>
+                                        <a th:href="@{/clubes/detalle/{id}(id=${club.id})}" 
+                                           class="btn btn-primary-custom btn-sm w-100">
+                                            <i class="fas fa-eye me-2"></i>Ver Detalle
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-white py-4">
+        <div class="container text-center">
+            <p class="mb-2">
+                <i class="fas fa-futbol me-2"></i>
+                Sistema de Gestión de Fútbol &copy; 2024
+            </p>
+            <small class="text-muted">
+                <i class="fas fa-code me-1"></i>
+                Desarrollado con Spring Boot y Thymeleaf
+            </small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Scripts personalizados -->
+    <script>
+        // Actualizar fecha y hora
+        function updateDateTime() {
+            const now = new Date();
+            
+            const dateOptions = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateStr = now.toLocaleDateString('es-ES', dateOptions);
+            document.getElementById('currentDate').textContent = dateStr;
+            
+            const timeStr = now.toLocaleTimeString('es-ES');
+            document.getElementById('currentTime').textContent = timeStr;
+        }
+        
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        // Animación de contadores
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target') || counter.textContent);
+                const duration = 2000;
+                const step = Math.ceil(target / (duration / 16));
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += step;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    counter.textContent = current;
+                }, 16);
+            });
+        }
+
+        // Ejecutar animaciones cuando la página carga
+        window.addEventListener('load', () => {
+            animateCounters();
+            
+            // Agregar animaciones a elementos cuando entran en viewport
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.card-custom').forEach(card => {
+                observer.observe(card);
+            });
+        });
+
+        // Efecto parallax suave en las stat cards
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.stat-card');
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+            
+            cards.forEach((card, index) => {
+                const speed = (index + 1) * 2;
+                const x = (mouseX * speed) - (speed / 2);
+                const y = (mouseY * speed) - (speed / 2);
+                
+                card.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
+
+        // Click en stat cards para navegar
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const text = this.querySelector('p').textContent.toLowerCase();
+                let url = '/';
+                
+                if (text.includes('asociaciones')) url = '/asociaciones';
+                else if (text.includes('clubes')) url = '/clubes';
+                else if (text.includes('jugadores')) url = '/jugadores';
+                else if (text.includes('entrenadores')) url = '/entrenadores';
+                else if (text.includes('competiciones')) url = '/competiciones';
+                
+                window.location.href = url;
+            });
+        });
+
+        // Efecto de ripple en los botones
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple-effect');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Agregar estilos para el efecto ripple
+        const style = document.createElement('style');
+        style.textContent = `
+            .btn {
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .ripple-effect {
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.6);
+                transform: scale(0);
+                animation: ripple-animation 0.6s ease-out;
+                pointer-events: none;
+            }
+            
+            @keyframes ripple-animation {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Auto-refresh stats cada 30 segundos (opcional)
+        let autoRefresh = false; // Cambiar a true si quieres activar auto-refresh
+        
+        if (autoRefresh) {
+            setInterval(() => {
+                console.log('Actualizando estadísticas...');
+                // Aquí podrías hacer una llamada AJAX para actualizar las estadísticas
+                // sin recargar toda la página
+            }, 30000);
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Notificación de bienvenida (opcional)
+        setTimeout(() => {
+            const hasShownWelcome = sessionStorage.getItem('welcomeShown');
+            
+            if (!hasShownWelcome) {
+                // Crear notificación personalizada
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 10px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    z-index: 10000;
+                    animation: slideInRight 0.5s ease-out;
+                `;
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <i class="fas fa-check-circle me-2" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <strong>¡Bienvenido al Dashboard!</strong>
+                            <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">
+                                Sistema de gestión de fútbol
+                            </p>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="background: none; border: none; color: white; margin-left: 1rem; cursor: pointer; font-size: 1.2rem;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Agregar animación
+                const styleAnimation = document.createElement('style');
+                styleAnimation.textContent = `
+                    @keyframes slideInRight {
+                        from {
+                            transform: translateX(400px);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                `;
+                document.head.appendChild(styleAnimation);
+                
+                // Auto-cerrar después de 5 segundos
+                setTimeout(() => {
+                    notification.style.animation = 'slideInRight 0.5s ease-out reverse';
+                    setTimeout(() => notification.remove(), 500);
+                }, 5000);
+                
+                sessionStorage.setItem('welcomeShown', 'true');
+            }
+        }, 500);
+
+        // Agregar tooltips de Bootstrap si están disponibles
+        if (typeof bootstrap !== 'undefined') {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        // Detectar modo oscuro del sistema (opcional para futuras implementaciones)
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        if (prefersDarkScheme.matches) {
+            console.log('El usuario prefiere modo oscuro');
+            // Aquí podrías aplicar estilos de modo oscuro
+        }
+
+        // Easter egg: Konami code
+        let konamiCode = [];
+        const konamiPattern = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        
+        document.addEventListener('keydown', (e) => {
+            konamiCode.push(e.key);
+            konamiCode = konamiCode.slice(-10);
+            
+            if (konamiCode.join(',') === konamiPattern.join(',')) {
+                document.querySelectorAll('.stat-card').forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.animation = 'bounce 1s ease infinite';
+                    }, index * 100);
+                });
+                
+                setTimeout(() => {
+                    document.querySelectorAll('.stat-card').forEach(card => {
+                        card.style.animation = '';
+                    });
+                }, 3000);
+            }
+        });
+
+        // Agregar animación bounce
+        const bounceStyle = document.createElement('style');
+        bounceStyle.textContent = `
+            @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(bounceStyle);
+
+        console.log('%c¡Dashboard cargado exitosamente! 🎉', 'color: #667eea; font-size: 20px; font-weight: bold;');
+        console.log('%cSistema de Gestión de Fútbol v1.0', 'color: #764ba2; font-size: 14px;');
+    </script>
+</body>
+</html>

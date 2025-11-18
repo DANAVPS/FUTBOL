@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">Formulario Jugador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+        }
+        .card-custom {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+        }
+        .btn-success-custom {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            border: none;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        .input-group-text {
+            background-color: #f8f9fa;
+            border-right: none;
+        }
+        .input-group .form-control {
+            border-left: none;
+        }
+        .input-group:focus-within .input-group-text {
+            border-color: #3498db;
+        }
+        .error-message {
+            display: none;
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .error-message.show {
+            display: block;
+        }
+        .form-control.is-invalid {
+            border-color: #e74c3c;
+        }
+        .posicion-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .posicion-option {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .posicion-option:hover {
+            border-color: #3498db;
+            background-color: #f8f9fa;
+        }
+        .posicion-option.selected {
+            border-color: #3498db;
+            background-color: #e3f2fd;
+        }
+        .posicion-option input[type="radio"] {
+            display: none;
+        }
+        .numero-preview {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #3498db;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="fas fa-futbol me-2"></i>Sistema de Fútbol
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" th:href="@{/}">Inicio</a>
+                <a class="nav-link" th:href="@{/asociaciones}">Asociaciones</a>
+                <a class="nav-link" th:href="@{/clubes}">Clubes</a>
+                <a class="nav-link" th:href="@{/jugadores}">Jugadores</a>
+                <a class="nav-link" th:href="@{/entrenadores}">Entrenadores</a>
+                <a class="nav-link" th:href="@{/competiciones}">Competiciones</a>
+                <a class="nav-link" th:href="@{/h2-console}" target="_blank">Base de Datos</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Encabezado -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-user-plus me-2"></i>
+                <span th:text="${titulo}">Formulario Jugador</span>
+            </h2>
+            <a th:href="@{/jugadores}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+
+        <!-- Formulario -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card card-custom">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>
+                            Información del Jugador
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/jugadores/guardar}" 
+                              th:object="${jugador}" 
+                              method="post" 
+                              id="formularioJugador">
+                            
+                            <!-- ID oculto para edición -->
+                            <input type="hidden" th:field="*{id}" />
+
+                            <!-- Nombre -->
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label required">Nombre</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="nombre" 
+                                           th:field="*{nombre}" 
+                                           placeholder="Ej: James"
+                                           required 
+                                           maxlength="100"
+                                           minlength="2">
+                                </div>
+                                <div class="error-message" id="errorNombre">
+                                    El nombre debe tener entre 2 y 100 caracteres
+                                </div>
+                                <div class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                            </div>
+
+                            <!-- Apellido -->
+                            <div class="mb-3">
+                                <label for="apellido" class="form-label required">Apellido</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-id-card"></i>
+                                    </span>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="apellido" 
+                                           th:field="*{apellido}" 
+                                           placeholder="Ej: Rodríguez"
+                                           required 
+                                           maxlength="100"
+                                           minlength="2">
+                                </div>
+                                <div class="error-message" id="errorApellido">
+                                    El apellido debe tener entre 2 y 100 caracteres
+                                </div>
+                                <div class="text-danger" th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></div>
+                            </div>
+
+                            <!-- Número de Camiseta -->
+                            <div class="mb-3">
+                                <label for="numero" class="form-label required">Número de Camiseta</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-hashtag"></i>
+                                    </span>
+                                    <input type="number"
+                                           class="form-control"
+                                           id="numero"
+                                           th:field="*{numero}"
+                                           placeholder="10"
+                                           min="1"
+                                           max="99"
+                                           required>
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Número único entre 1 y 99
+                                </small>
+                                <div class="error-message" id="errorNumero">
+                                    El número debe estar entre 1 y 99
+                                </div>
+                                <div class="text-danger" th:if="${#fields.hasErrors('numero')}" th:errors="*{numero}"></div>
+                                
+                                <!-- Vista previa del número -->
+                                <div class="numero-preview" id="numeroPreview" style="display: none;">
+                                    #<span id="numeroTexto">10</span>
+                                </div>
+                            </div>
+
+                            <!-- Posición -->
+                            <div class="mb-4">
+                                <label class="form-label required">Posición</label>
+                                <input type="hidden" th:field="*{posicion}" id="posicionInput" required>
+                                
+                                <div class="posicion-selector">
+                                    <label class="posicion-option" data-posicion="Portero">
+                                        <input type="radio" name="posicionRadio" value="Portero" 
+                                               th:checked="${jugador.posicion == 'Portero'}">
+                                        <div>
+                                            <i class="fas fa-hand-paper fa-2x text-warning mb-2"></i>
+                                            <h6>Portero</h6>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="posicion-option" data-posicion="Defensa">
+                                        <input type="radio" name="posicionRadio" value="Defensa"
+                                               th:checked="${jugador.posicion == 'Defensa'}">
+                                        <div>
+                                            <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                                            <h6>Defensa</h6>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="posicion-option" data-posicion="Mediocampista">
+                                        <input type="radio" name="posicionRadio" value="Mediocampista"
+                                               th:checked="${jugador.posicion == 'Mediocampista'}">
+                                        <div>
+                                            <i class="fas fa-running fa-2x text-primary mb-2"></i>
+                                            <h6>Mediocampista</h6>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="posicion-option" data-posicion="Delantero">
+                                        <input type="radio" name="posicionRadio" value="Delantero"
+                                               th:checked="${jugador.posicion == 'Delantero'}">
+                                        <div>
+                                            <i class="fas fa-futbol fa-2x text-danger mb-2"></i>
+                                            <h6>Delantero</h6>
+                                        </div>
+                                    </label>
+                                </div>
+                                
+                                <div class="error-message" id="errorPosicion">
+                                    Debe seleccionar una posición
+                                </div>
+                                <div class="text-danger" th:if="${#fields.hasErrors('posicion')}" th:errors="*{posicion}"></div>
+                            </div>
+
+                            <!-- Club (Relación ManyToOne - Opcional) -->
+                            <div class="mb-4">
+                                <label for="club" class="form-label">Club</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </span>
+                                    <select class="form-select" 
+                                            id="club" 
+                                            th:field="*{club}">
+                                        <option value="">Sin Club</option>
+                                        <option th:each="club : ${clubes}" 
+                                                th:value="${club.id}" 
+                                                th:text="${club.nombre}"
+                                                th:selected="${jugador.club != null && jugador.club.id == club.id}">
+                                            Club
+                                        </option>
+                                    </select>
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Seleccione el club al que pertenece (opcional)
+                                </small>
+                            </div>
+
+                            <!-- Información adicional -->
+                            <div class="alert alert-info" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Nota:</strong> Todos los campos marcados con <span class="text-danger">*</span> son obligatorios. El número de camiseta debe ser único.
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="@{/jugadores}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-success-custom text-white" id="btnGuardar">
+                                    <i class="fas fa-save me-2"></i>Guardar Jugador
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Tarjeta de ayuda -->
+                <div class="card card-custom mt-4">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            Guía de Llenado
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="mb-0">
+                                    <li><strong>Nombre y Apellido:</strong> Datos personales del jugador</li>
+                                    <li><strong>Número:</strong> Dorsal de la camiseta (1-99, único)</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="mb-0">
+                                    <li><strong>Posición:</strong> Función dentro del campo</li>
+                                    <li><strong>Club:</strong> Equipo al que pertenece (opcional)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista previa (si estamos editando) -->
+                <div class="card card-custom mt-4" th:if="${jugador.id != null}">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-eye me-2"></i>
+                            Datos Actuales
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>ID:</strong> <span th:text="${jugador.id}"></span></p>
+                                <p><strong>Número actual:</strong> 
+                                    <span class="badge bg-dark" th:text="${jugador.numero}">0</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Posición actual:</strong> 
+                                    <span class="badge bg-primary" th:text="${jugador.posicion}">-</span>
+                                </p>
+                                <p><strong>Club actual:</strong>
+                                    <span th:if="${jugador.club != null}" 
+                                          class="badge bg-success" 
+                                          th:text="${jugador.club.nombre}">Club</span>
+                                    <span th:if="${jugador.club == null}" 
+                                          class="badge bg-secondary">Sin Club</span>
+                                </p>
+                            </div>
+                        </div>
+                        <small class="text-muted">Los cambios se guardarán al presionar "Guardar Jugador"</small>
+                    </div>
+                </div>
+
+                <!-- Información de posiciones -->
+                <div class="card card-custom mt-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="fas fa-info-circle text-primary me-2"></i>
+                            Descripción de Posiciones
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong><i class="fas fa-hand-paper text-warning me-2"></i>Portero:</strong> 
+                                   Protege la portería</p>
+                                <p><strong><i class="fas fa-shield-alt text-success me-2"></i>Defensa:</strong> 
+                                   Protege al equipo</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong><i class="fas fa-running text-primary me-2"></i>Mediocampista:</strong> 
+                                   Enlaza defensa y ataque</p>
+                                <p><strong><i class="fas fa-futbol text-danger me-2"></i>Delantero:</strong> 
+                                   Busca el gol</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container text-center">
+            <p class="mb-0">
+                <i class="fas fa-futbol me-2"></i>
+                Sistema de Gestión de Fútbol &copy; 2024
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Validación y funcionalidades del formulario -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('formularioJugador');
+            const nombre = document.getElementById('nombre');
+            const apellido = document.getElementById('apellido');
+            const numero = document.getElementById('numero');
+            const numeroPreview = document.getElementById('numeroPreview');
+            const numeroTexto = document.getElementById('numeroTexto');
+            const posicionInput = document.getElementById('posicionInput');
+            const posicionOptions = document.querySelectorAll('.posicion-option');
+
+            // Validación de nombre
+            nombre.addEventListener('input', function() {
+                const errorNombre = document.getElementById('errorNombre');
+                if (this.value.length < 2 || this.value.length > 100) {
+                    this.classList.add('is-invalid');
+                    errorNombre.classList.add('show');
+                } else {
+                    this.classList.remove('is-invalid');
+                    errorNombre.classList.remove('show');
+                }
+            });
+
+            // Validación de apellido
+            apellido.addEventListener('input', function() {
+                const errorApellido = document.getElementById('errorApellido');
+                if (this.value.length < 2 || this.value.length > 100) {
+                    this.classList.add('is-invalid');
+                    errorApellido.classList.add('show');
+                } else {
+                    this.classList.remove('is-invalid');
+                    errorApellido.classList.remove('show');
+                }
+            });
+
+            // Vista previa del número
+            numero.addEventListener('input', function() {
+                const errorNumero = document.getElementById('errorNumero');
+                const valor = parseInt(this.value);
+                
+                if (this.value && valor >= 1 && valor <= 99) {
+                    numeroTexto.textContent = valor;
+                    numeroPreview.style.display = 'block';
+                    this.classList.remove('is-invalid');
+                    errorNumero.classList.remove('show');
+                } else if (this.value) {
+                    numeroPreview.style.display = 'none';
+                    this.classList.add('is-invalid');
+                    errorNumero.classList.add('show');
+                } else {
+                    numeroPreview.style.display = 'none';
+                }
+            });
+
+            // Mostrar vista previa si ya hay número (modo edición)
+            if (numero.value) {
+                numeroTexto.textContent = numero.value;
+                numeroPreview.style.display = 'block';
+            }
+
+            // Manejo de selección de posición
+            posicionOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remover selección previa
+                    posicionOptions.forEach(opt => opt.classList.remove('selected'));
+                    
+                    // Agregar selección actual
+                    this.classList.add('selected');
+                    
+                    // Actualizar input oculto
+                    const posicion = this.dataset.posicion;
+                    posicionInput.value = posicion;
+                    
+                    // Marcar radio button
+                    this.querySelector('input[type="radio"]').checked = true;
+                    
+                    // Remover error si existe
+                    document.getElementById('errorPosicion').classList.remove('show');
+                });
+
+                // Marcar como seleccionado si ya tiene una posición (modo edición)
+                if (option.querySelector('input[type="radio"]').checked) {
+                    option.classList.add('selected');
+                }
+            });
+
+            // Validación al enviar formulario
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+                const errorPosicion = document.getElementById('errorPosicion');
+
+                // Validar que se haya seleccionado una posición
+                if (!posicionInput.value) {
+                    errorPosicion.classList.add('show');
+                    isValid = false;
+                } else {
+                    errorPosicion.classList.remove('show');
+                }
+
+                // Validar número
+                const valorNumero = parseInt(numero.value);
+                if (!numero.value || valorNumero < 1 || valorNumero > 99) {
+                    numero.classList.add('is-invalid');
+                    document.getElementById('errorNumero').classList.add('show');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Por favor corrija los errores en el formulario antes de guardar.');
+                    return false;
+                }
+
+                // Confirmar guardado
+                const nombreCompleto = nombre.value + ' ' + apellido.value;
+                const confirmMsg = nombreCompleto ? 
+                    `¿Está seguro de guardar al jugador "${nombreCompleto}" con el número ${numero.value}?` : 
+                    '¿Está seguro de guardar este jugador?';
+                
+                if (!confirm(confirmMsg)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Capitalizar primera letra de nombre y apellido
+            function capitalizarPrimeraLetra(input) {
+                input.addEventListener('blur', function() {
+                    if (this.value) {
+                        this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1).toLowerCase();
+                    }
+                });
+            }
+
+            capitalizarPrimeraLetra(nombre);
+            capitalizarPrimeraLetra(apellido);
+        });
+    </script>
+</body>
+</html>

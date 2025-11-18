@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">Formulario Club</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+        }
+        .card-custom {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+        }
+        .btn-success-custom {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            border: none;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        .input-group-text {
+            background-color: #f8f9fa;
+            border-right: none;
+        }
+        .input-group .form-control, .input-group .form-select {
+            border-left: none;
+        }
+        .input-group:focus-within .input-group-text {
+            border-color: #3498db;
+        }
+        .error-message {
+            display: none;
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .error-message.show {
+            display: block;
+        }
+        .form-control.is-invalid, .form-select.is-invalid {
+            border-color: #e74c3c;
+        }
+        .competicion-item {
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            background-color: #f8f9fa;
+        }
+        .section-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="fas fa-futbol me-2"></i>Sistema de Fútbol
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" th:href="@{/}">Inicio</a>
+                <a class="nav-link" th:href="@{/asociaciones}">Asociaciones</a>
+                <a class="nav-link" th:href="@{/clubes}">Clubes</a>
+                <a class="nav-link" th:href="@{/jugadores}">Jugadores</a>
+                <a class="nav-link" th:href="@{/entrenadores}">Entrenadores</a>
+                <a class="nav-link" th:href="@{/competiciones}">Competiciones</a>
+                <a class="nav-link" th:href="@{/h2-console}" target="_blank">Base de Datos</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Encabezado -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-shield-alt me-2"></i>
+                <span th:text="${titulo}">Formulario Club</span>
+            </h2>
+            <a th:href="@{/clubes}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+
+        <!-- Formulario -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card card-custom">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>
+                            Información del Club
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/clubes/guardar}" 
+                              th:object="${club}" 
+                              method="post" 
+                              id="formularioClub">
+                            
+                            <!-- ID oculto para edición -->
+                            <input type="hidden" th:field="*{id}" />
+
+                            <!-- SECCIÓN 1: INFORMACIÓN BÁSICA -->
+                            <div class="section-header">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Información Básica
+                            </div>
+
+                            <!-- Nombre del Club -->
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label required">Nombre del Club</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </span>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="nombre" 
+                                           th:field="*{nombre}" 
+                                           placeholder="Ej: Millonarios FC"
+                                           required 
+                                           maxlength="200"
+                                           minlength="3">
+                                </div>
+                                <div class="error-message" id="errorNombre">
+                                    El nombre debe tener entre 3 y 200 caracteres
+                                </div>
+                                <div class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                            </div>
+
+                            <!-- Ciudad -->
+                            <div class="mb-3">
+                                <label for="ciudad" class="form-label">Ciudad</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </span>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="ciudad" 
+                                           th:field="*{ciudad}" 
+                                           placeholder="Ej: Bogotá"
+                                           maxlength="100">
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Ciudad donde tiene sede el club
+                                </small>
+                                <div class="text-danger" th:if="${#fields.hasErrors('ciudad')}" th:errors="*{ciudad}"></div>
+                            </div>
+
+                            <!-- Año de Fundación -->
+                            <div class="mb-4">
+                                <label for="anioFundacion" class="form-label">Año de Fundación</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-calendar"></i>
+                                    </span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="anioFundacion" 
+                                           th:field="*{anioFundacion}" 
+                                           placeholder="Ej: 1946"
+                                           min="1800"
+                                           th:max="${#temporals.year(#temporals.createNow())}">
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Año en que fue fundado el club (entre 1800 y <span th:text="${#temporals.year(#temporals.createNow())}">2024</span>)
+                                </small>
+                                <div class="error-message" id="errorAnio">
+                                    El año debe ser válido
+                                </div>
+                                <div class="text-danger" th:if="${#fields.hasErrors('anioFundacion')}" th:errors="*{anioFundacion}"></div>
+                            </div>
+
+                            <!-- Años de historia (calculado automáticamente) -->
+                            <div class="alert alert-light border" role="alert" id="historiaInfo" style="display: none;">
+                                <i class="fas fa-history text-primary me-2"></i>
+                                <strong>Historia:</strong> <span id="historiaTexto"></span>
+                            </div>
+
+                            <!-- SECCIÓN 2: RELACIONES -->
+                            <div class="section-header mt-4">
+                                <i class="fas fa-users me-2"></i>
+                                Relaciones del Club
+                            </div>
+
+                            <!-- Entrenador -->
+                            <div class="mb-3">
+                                <label for="entrenadorId" class="form-label">Entrenador</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user-tie"></i>
+                                    </span>
+                                    <select class="form-select" 
+                                            id="entrenadorId" 
+                                            name="entrenadorId">
+                                        <option value="">-- Seleccionar Entrenador --</option>
+                                        <option th:each="entrenador : ${entrenadores}" 
+                                                th:value="${entrenador.id}"
+                                                th:text="${entrenador.nombre + ' ' + entrenador.apellido + ' (' + entrenador.nacionalidad + ')'}"
+                                                th:selected="${club.entrenador != null && club.entrenador.id == entrenador.id}">
+                                            Entrenador
+                                        </option>
+                                    </select>
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Selecciona el entrenador del club (relación @OneToOne)
+                                </small>
+                            </div>
+
+                            <!-- Asociación -->
+                            <div class="mb-4">
+                                <label for="asociacionId" class="form-label">Asociación</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-building"></i>
+                                    </span>
+                                    <select class="form-select" 
+                                            id="asociacionId" 
+                                            name="asociacionId">
+                                        <option value="">-- Seleccionar Asociación --</option>
+                                        <option th:each="asociacion : ${asociaciones}" 
+                                                th:value="${asociacion.id}"
+                                                th:text="${asociacion.nombre + ' - ' + asociacion.pais}"
+                                                th:selected="${club.asociacion != null && club.asociacion.id == asociacion.id}">
+                                            Asociación
+                                        </option>
+                                    </select>
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Asociación o federación a la que pertenece el club (relación @ManyToOne)
+                                </small>
+                            </div>
+
+                            <!-- Competiciones -->
+                            <div class="mb-4">
+                                <label class="form-label">Competiciones</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-trophy"></i>
+                                    </span>
+                                    <div class="form-control" style="height: auto; min-height: 120px; overflow-y: auto;">
+                                        <div th:if="${competiciones == null or competiciones.empty}" class="text-muted">
+                                            <i class="fas fa-inbox"></i> No hay competiciones disponibles
+                                        </div>
+                                        <div th:unless="${competiciones == null or competiciones.empty}">
+                                            <div th:each="competicion : ${competiciones}" class="form-check">
+                                                <input class="form-check-input" 
+                                                       type="checkbox" 
+                                                       name="competicionesIds" 
+                                                       th:value="${competicion.id}"
+                                                       th:id="'comp_' + ${competicion.id}"
+                                                       th:checked="${club.competiciones != null && club.competiciones.contains(competicion)}">
+                                                <label class="form-check-label" th:for="'comp_' + ${competicion.id}">
+                                                    <strong th:text="${competicion.nombre}">Competición</strong>
+                                                    <span class="badge bg-warning text-dark ms-2">
+                                                        $<span th:text="${#numbers.formatInteger(competicion.montoPremio, 0, 'COMMA')}">0</span>
+                                                    </span>
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-calendar-alt"></i>
+                                                        <span th:text="${#temporals.format(competicion.fechaInicio, 'dd/MM/yyyy')}"></span>
+                                                        - 
+                                                        <span th:text="${#temporals.format(competicion.fechaFin, 'dd/MM/yyyy')}"></span>
+                                                    </small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Selecciona las competiciones en las que participa el club (relación @ManyToMany)
+                                </small>
+                            </div>
+
+                            <!-- Información adicional -->
+                            <div class="alert alert-info" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Nota:</strong> Solo el campo "Nombre del Club" es obligatorio <span class="text-danger">*</span>. 
+                                Las relaciones con entrenador, asociación y competiciones son opcionales y pueden agregarse después.
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="@{/clubes}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-success-custom text-white" id="btnGuardar">
+                                    <i class="fas fa-save me-2"></i>Guardar Club
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna lateral con información adicional -->
+            <div class="col-lg-4">
+                <!-- Tarjeta de ayuda -->
+                <div class="card card-custom mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            Guía de Relaciones JPA
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li><strong>@OneToOne:</strong> Un club tiene un entrenador único</li>
+                            <li><strong>@ManyToOne:</strong> Muchos clubes pertenecen a una asociación</li>
+                            <li><strong>@OneToMany:</strong> Un club tiene muchos jugadores (se gestiona desde jugadores)</li>
+                            <li><strong>@ManyToMany:</strong> Un club puede participar en muchas competiciones</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Tarjeta de información -->
+                <div class="card card-custom mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Consejos
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>El nombre del club debe ser único en el sistema</li>
+                            <li>Puedes dejar campos opcionales vacíos y completarlos después</li>
+                            <li>Los jugadores se asignan desde el módulo de jugadores</li>
+                            <li>Puedes seleccionar múltiples competiciones</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Vista previa (si estamos editando) -->
+                <div class="card card-custom" th:if="${club.id != null}">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-eye me-2"></i>
+                            Datos Actuales
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2"><strong>ID:</strong> <span th:text="${club.id}"></span></p>
+                        <p class="mb-2"><strong>Jugadores:</strong> 
+                            <span class="badge bg-primary" th:text="${club.jugadores != null ? club.jugadores.size() : 0}">0</span>
+                        </p>
+                        <p class="mb-2"><strong>Competiciones:</strong> 
+                            <span class="badge bg-warning text-dark" th:text="${club.competiciones != null ? club.competiciones.size() : 0}">0</span>
+                        </p>
+                        <hr>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            Editando registro existente. Los cambios se guardarán al presionar "Guardar Club"
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Estadísticas rápidas -->
+                <div class="card card-custom mt-3" th:if="${club.id == null}">
+                    <div class="card-body text-center">
+                        <i class="fas fa-plus-circle fa-3x text-success mb-3"></i>
+                        <h6 class="text-muted">Creando Nuevo Club</h6>
+                        <p class="small text-muted mb-0">Complete el formulario para registrar un nuevo club en el sistema</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container text-center">
+            <p class="mb-0">
+                <i class="fas fa-futbol me-2"></i>
+                Sistema de Gestión de Fútbol &copy; 2024
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Validación y funcionalidades del formulario -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('formularioClub');
+            const nombre = document.getElementById('nombre');
+            const anioFundacion = document.getElementById('anioFundacion');
+            const historiaInfo = document.getElementById('historiaInfo');
+            const historiaTexto = document.getElementById('historiaTexto');
+            const anioActual = new Date().getFullYear();
+
+            // Función para calcular años de historia
+            function calcularHistoria() {
+                if (anioFundacion.value) {
+                    const anio = parseInt(anioFundacion.value);
+                    
+                    if (anio >= 1800 && anio <= anioActual) {
+                        const anosHistoria = anioActual - anio;
+                        historiaTexto.textContent = `${anosHistoria} años de historia (fundado en ${anio})`;
+                        historiaInfo.style.display = 'block';
+                    } else {
+                        historiaInfo.style.display = 'none';
+                    }
+                }
+            }
+
+            // Validación de nombre
+            nombre.addEventListener('input', function() {
+                const errorNombre = document.getElementById('errorNombre');
+                if (this.value.length > 0 && this.value.length < 3) {
+                    this.classList.add('is-invalid');
+                    errorNombre.classList.add('show');
+                } else {
+                    this.classList.remove('is-invalid');
+                    errorNombre.classList.remove('show');
+                }
+            });
+
+            // Validación de año
+            anioFundacion.addEventListener('input', function() {
+                const errorAnio = document.getElementById('errorAnio');
+                const valor = parseInt(this.value);
+                
+                if (this.value && (valor < 1800 || valor > anioActual)) {
+                    this.classList.add('is-invalid');
+                    errorAnio.textContent = `El año debe estar entre 1800 y ${anioActual}`;
+                    errorAnio.classList.add('show');
+                    historiaInfo.style.display = 'none';
+                } else {
+                    this.classList.remove('is-invalid');
+                    errorAnio.classList.remove('show');
+                    calcularHistoria();
+                }
+            });
+
+            // Calcular historia si ya hay año (modo edición)
+            calcularHistoria();
+
+            // Validación al enviar formulario
+            form.addEventListener('submit', function(e) {
+                // Validar nombre
+                if (nombre.value.length < 3) {
+                    e.preventDefault();
+                    alert('El nombre del club debe tener al menos 3 caracteres.');
+                    nombre.focus();
+                    return false;
+                }
+
+                // Validar año si está presente
+                if (anioFundacion.value) {
+                    const anio = parseInt(anioFundacion.value);
+                    if (anio < 1800 || anio > anioActual) {
+                        e.preventDefault();
+                        alert(`El año de fundación debe estar entre 1800 y ${anioActual}.`);
+                        anioFundacion.focus();
+                        return false;
+                    }
+                }
+
+                // Confirmar guardado
+                const confirmMsg = nombre.value ? 
+                    `¿Está seguro de guardar el club "${nombre.value}"?` : 
+                    '¿Está seguro de guardar este club?';
+                
+                if (!confirm(confirmMsg)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Contador de competiciones seleccionadas
+            const checkboxes = document.querySelectorAll('input[name="competicionesIds"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const seleccionadas = document.querySelectorAll('input[name="competicionesIds"]:checked').length;
+                    console.log(`Competiciones seleccionadas: ${seleccionadas}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

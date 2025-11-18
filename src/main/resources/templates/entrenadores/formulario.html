@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">Formulario Entrenador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+        }
+        .card-custom {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+        }
+        .btn-success-custom {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border: none;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+        }
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        .input-group-text {
+            background-color: #f8f9fa;
+            border-right: none;
+        }
+        .input-group .form-control, .input-group .form-select {
+            border-left: none;
+        }
+        .input-group:focus-within .input-group-text {
+            border-color: #e74c3c;
+        }
+        .error-message {
+            display: none;
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .error-message.show {
+            display: block;
+        }
+        .form-control.is-invalid, .form-select.is-invalid {
+            border-color: #e74c3c;
+        }
+        .char-counter {
+            font-size: 0.875rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+        .char-counter.warning {
+            color: #f39c12;
+        }
+        .char-counter.danger {
+            color: #e74c3c;
+        }
+        .club-preview {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="fas fa-futbol me-2"></i>Sistema de Fútbol
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" th:href="@{/}">Inicio</a>
+                <a class="nav-link" th:href="@{/asociaciones}">Asociaciones</a>
+                <a class="nav-link" th:href="@{/clubes}">Clubes</a>
+                <a class="nav-link" th:href="@{/jugadores}">Jugadores</a>
+                <a class="nav-link" th:href="@{/entrenadores}">Entrenadores</a>
+                <a class="nav-link" th:href="@{/competiciones}">Competiciones</a>
+                <a class="nav-link" th:href="@{/h2-console}" target="_blank">Base de Datos</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Encabezado -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-user-tie me-2"></i>
+                <span th:text="${titulo}">Formulario Entrenador</span>
+            </h2>
+            <a th:href="@{/entrenadores}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+
+        <!-- Formulario -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card card-custom">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>
+                            Información del Entrenador
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/entrenadores/guardar}" 
+                              th:object="${entrenador}" 
+                              method="post" 
+                              id="formularioEntrenador">
+                            
+                            <!-- ID oculto para edición -->
+                            <input type="hidden" th:field="*{id}" />
+
+                            <!-- Nombre -->
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label required">Nombre</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-signature"></i>
+                                    </span>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="nombre" 
+                                           th:field="*{nombre}" 
+                                           placeholder="Ej: José"
+                                           required 
+                                           maxlength="100"
+                                           minlength="2"
+                                           pattern="[A-Za-zÀ-ÿ\s]+">
+                                </div>
+                                <div class="char-counter" id="charCounterNombre">
+                                    <span id="charCountNombre">0</span> / 100 caracteres
+                                </div>
+                                <div class="error-message" id="errorNombre">
+                                    El nombre debe tener entre 2 y 100 caracteres y solo contener letras
+                                </div>
+                                <div class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                            </div>
+
+                            <!-- Apellido -->
+                            <div class="mb-3">
+                                <label for="apellido" class="form-label required">Apellido</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-id-card"></i>
+                                    </span>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="apellido"
+                                           th:field="*{apellido}"
+                                           placeholder="Ej: Pékerman"
+                                           maxlength="100"
+                                           minlength="2"
+                                           pattern="[A-Za-zÀ-ÿ\s]+"
+                                           required>
+                                </div>
+                                <div class="char-counter" id="charCounterApellido">
+                                    <span id="charCountApellido">0</span> / 100 caracteres
+                                </div>
+                                <div class="error-message" id="errorApellido">
+                                    El apellido debe tener entre 2 y 100 caracteres y solo contener letras
+                                </div>
+                                <div class="text-danger" th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></div>
+                            </div>
+
+                            <!-- Edad -->
+                            <div class="mb-3">
+                                <label for="edad" class="form-label required">Edad</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </span>
+                                    <input type="number"
+                                           class="form-control"
+                                           id="edad"
+                                           th:field="*{edad}"
+                                           placeholder="Ej: 45"
+                                           min="25"
+                                           max="85"
+                                           required>
+                                    <span class="input-group-text">años</span>
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Edad del entrenador (entre 25 y 85 años)
+                                </small>
+                                <div class="error-message" id="errorEdad">
+                                    La edad debe estar entre 25 y 85 años
+                                </div>
+                                <div class="text-danger" th:if="${#fields.hasErrors('edad')}" th:errors="*{edad}"></div>
+                            </div>
+
+                            <!-- Nacionalidad -->
+                            <div class="mb-4">
+                                <label for="nacionalidad" class="form-label required">Nacionalidad</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-flag"></i>
+                                    </span>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="nacionalidad"
+                                           th:field="*{nacionalidad}"
+                                           placeholder="Ej: Argentina"
+                                           maxlength="100"
+                                           minlength="3"
+                                           pattern="[A-Za-zÀ-ÿ\s]+"
+                                           required>
+                                </div>
+                                <div class="char-counter" id="charCounterNacionalidad">
+                                    <span id="charCountNacionalidad">0</span> / 100 caracteres
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    País de origen del entrenador
+                                </small>
+                                <div class="error-message" id="errorNacionalidad">
+                                    La nacionalidad debe tener entre 3 y 100 caracteres
+                                </div>
+                                <div class="text-danger" th:if="${#fields.hasErrors('nacionalidad')}" th:errors="*{nacionalidad}"></div>
+                            </div>
+
+                            <!-- Club (Opcional - Relación OneToOne) -->
+                            <div class="mb-4">
+                                <label for="club" class="form-label">
+                                    <i class="fas fa-shield-alt me-2"></i>Club Asignado (Opcional)
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </span>
+                                    <select class="form-select" id="club" name="club.id" th:field="*{club}">
+                                        <option value="">-- Sin Club Asignado --</option>
+                                        <option th:each="club : ${clubes}" 
+                                                th:value="${club.id}" 
+                                                th:text="${club.nombre}"
+                                                th:selected="${entrenador.club != null && entrenador.club.id == club.id}">
+                                            Nombre del Club
+                                        </option>
+                                    </select>
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    El entrenador puede estar asignado a un club o permanecer disponible
+                                </small>
+                                <div class="club-preview" id="clubPreview" style="display: none;">
+                                    <strong><i class="fas fa-eye text-info"></i> Club seleccionado:</strong>
+                                    <span id="clubNombrePreview" class="text-primary"></span>
+                                </div>
+                            </div>
+
+                            <!-- Vista previa de datos -->
+                            <div class="alert alert-light border" role="alert" id="vistaPrevia" style="display: none;">
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-eye text-info me-2"></i>
+                                    Vista Previa
+                                </h6>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Nombre Completo:</strong> <span id="prevNombreCompleto">-</span></p>
+                                        <p class="mb-1"><strong>Edad:</strong> <span id="prevEdad">-</span> años</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Nacionalidad:</strong> <span id="prevNacionalidad">-</span></p>
+                                        <p class="mb-1"><strong>Club:</strong> <span id="prevClub">Sin asignar</span></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Información adicional -->
+                            <div class="alert alert-info" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Nota:</strong> Todos los campos marcados con <span class="text-danger">*</span> son obligatorios. El campo "Club Asignado" es opcional y puede dejarse sin seleccionar.
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="@{/entrenadores}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                                <button type="reset" class="btn btn-outline-secondary" id="btnLimpiar">
+                                    <i class="fas fa-eraser me-2"></i>Limpiar
+                                </button>
+                                <button type="submit" class="btn btn-success-custom text-white" id="btnGuardar">
+                                    <i class="fas fa-save me-2"></i>Guardar Entrenador
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Tarjeta de ayuda -->
+                <div class="card card-custom mt-4">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            Guía de Llenado
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <h6 class="text-danger"><i class="fas fa-signature me-1"></i> Nombre</h6>
+                                    <p class="small text-muted mb-0">
+                                        Primer nombre del entrenador.
+                                        <br>Ejemplos:
+                                        <ul class="small">
+                                            <li>José</li>
+                                            <li>Carlos</li>
+                                            <li>Hernán</li>
+                                        </ul>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <h6 class="text-danger"><i class="fas fa-id-card me-1"></i> Apellido</h6>
+                                    <p class="small text-muted mb-0">
+                                        Apellido(s) del entrenador.
+                                        <br>Ejemplos:
+                                        <ul class="small">
+                                            <li>Pékerman</li>
+                                            <li>Guardiola</li>
+                                            <li>Mourinho</li>
+                                        </ul>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <h6 class="text-danger"><i class="fas fa-calendar-alt me-1"></i> Edad</h6>
+                                    <p class="small text-muted mb-0">
+                                        Edad actual del entrenador en años completos. Debe estar entre 25 y 85 años.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <h6 class="text-danger"><i class="fas fa-flag me-1"></i> Nacionalidad</h6>
+                                    <p class="small text-muted mb-0">
+                                        País de origen.
+                                        <br>Ejemplos:
+                                        <ul class="small">
+                                            <li>Argentina</li>
+                                            <li>Colombia</li>
+                                            <li>Brasil</li>
+                                        </ul>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista previa de datos actuales (si estamos editando) -->
+                <div class="card card-custom mt-4" th:if="${entrenador.id != null}">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-database me-2"></i>
+                            Datos Actuales en el Sistema
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>ID:</strong> <span class="badge bg-primary" th:text="${entrenador.id}"></span></p>
+                                <p><strong>Nombre Completo Actual:</strong> 
+                                    <span class="text-primary" th:text="${entrenador.nombre + ' ' + entrenador.apellido}">Nombre Apellido</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Estado:</strong> <span class="badge bg-warning text-dark">Editando</span></p>
+                                <p><strong>Club Actual:</strong> 
+                                    <span class="badge bg-success" th:if="${entrenador.club != null}" th:text="${entrenador.club.nombre}">Club</span>
+                                    <span class="badge bg-secondary" th:if="${entrenador.club == null}">Sin club</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning mt-2 mb-0" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Importante:</strong> Los cambios se guardarán al presionar "Guardar Entrenador".
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consejos adicionales -->
+                <div class="card card-custom mt-4">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Consejos
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>Asegúrese de escribir correctamente el nombre y apellido del entrenador</li>
+                            <li>La edad debe ser realista para un entrenador profesional (25-85 años)</li>
+                            <li>Verifique que la nacionalidad esté correctamente escrita</li>
+                            <li>Un entrenador puede estar sin club (disponible) o asignado a un club específico</li>
+                            <li>Si asigna un club, éste será el club que dirige actualmente el entrenador</li>
+                            <li>Revise la vista previa antes de guardar para confirmar que los datos son correctos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container text-center">
+            <p class="mb-0">
+                <i class="fas fa-futbol me-2"></i>
+                Sistema de Gestión de Fútbol &copy; 2024
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Validación y funcionalidad del formulario -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('formularioEntrenador');
+            const nombre = document.getElementById('nombre');
+            const apellido = document.getElementById('apellido');
+            const edad = document.getElementById('edad');
+            const nacionalidad = document.getElementById('nacionalidad');
+            const club = document.getElementById('club');
+            const vistaPrevia = document.getElementById('vistaPrevia');
+            const clubPreview = document.getElementById('clubPreview');
+            const btnLimpiar = document.getElementById('btnLimpiar');
+
+            // Contador de caracteres
+            function actualizarContador(input, counterId, maxLength) {
+                const counter = document.getElementById(counterId);
+                const charCount = document.getElementById(counterId.replace('Counter', 'Count'));
+                const length = input.value.length;
+                
+                charCount.textContent = length;
+                
+                counter.classList.remove('warning', 'danger');
+                if (length > maxLength * 0.9) {
+                    counter.classList.add('danger');
+                } else if (length > maxLength * 0.75) {
+                    counter.classList.add('warning');
+                }
+            }
+
+            // Actualizar vista previa
+            function actualizarVistaPrevia() {
+                if (nombre.value || apellido.value || edad.value || nacionalidad.value) {
+                    const nombreCompleto = (nombre.value + ' ' + apellido.value).trim() || '-';
+                    document.getElementById('prevNombreCompleto').textContent = nombreCompleto;
+                    document.getElementById('prevEdad').textContent = edad.value || '-';
+                    document.getElementById('prevNacionalidad').textContent = nacionalidad.value || '-';
+                    
+                    const clubText = club.options[club.selectedIndex].text;
+                    document.getElementById('prevClub').textContent = club.value ? clubText : 'Sin asignar';
+                    
+                    vistaPrevia.style.display = 'block';
+                } else {
+                    vistaPrevia.style.display = 'none';
+                }
+            }
+
+            // Actualizar preview del club
+            function actualizarClubPreview() {
+                if (club.value) {
+                    const clubNombre = club.options[club.selectedIndex].text;
+                    document.getElementById('clubNombrePreview').textContent = clubNombre;
+                    clubPreview.style.display = 'block';
+                } else {
+                    clubPreview.style.display = 'none';
+                }
+            }
+
+            // Validación de nombre
+            nombre.addEventListener('input', function() {
+                actualizarContador(this, 'charCounterNombre', 100);
+                actualizarVistaPrevia();
+                
+                const errorNombre = document.getElementById('errorNombre');
+                const pattern = /^[A-Za-zÀ-ÿ\s]+$/;
+                
+                if (this.value.length > 0 && (this.value.length < 2 || !pattern.test(this.value))) {
+                    this.classList.add('is-invalid');
+                    errorNombre.classList.add('show');
+                } else {
+                    this.classList.remove('is-invalid');
+                    errorNombre.classList.remove('show');
+                }
+            });
+
+            // Validación de apellido
+            apellido.addEventListener('input', function() {
+                actualizarContador(this, 'charCounterApellido', 100);
+                actualizarVistaPrevia();
+                
+                const errorApellido = document.getElementById('errorApellido');
+                const pattern = /^[A-Za-zÀ-ÿ\s]+$/;
+                
+                if (this.value.length > 0 && (this.value.length < 2 || !pattern.test(this.value))) {
+                    this.classList.add('is-invalid');
+                    errorApellido.classList.add('show');
+                } else {
+                    this.classList.remove('is-invalid');
+                    errorApellido.classList.remove('show');
+                }
+            });
+
+            // Validación de edad
+            edad.addEventListener('input', function() {
+                actualizarVistaPrevia();
+                
+                const errorEdad = document.getElementById('errorEdad');
+                const edadValue = parseInt(this.value);
+                
+                if (this.value && (edadValue < 25 || edadValue > 85)) {
+                    this.classList.add('is-invalid');
+                    errorEdad.classList.add('show');
+                } else {
+                    this.classList.remove('is-invalid');
+                    errorEdad.classList.remove('show');
+                }
+            });
+
+            // Validación de nacionalidad
+            nacionalidad.addEventListener('input', function() {
+                actualizarContador(this, 'charCounterNacionalidad', 100);
+                actualizarVistaPrevia();
+                
+                const errorNacionalidad = document.getElementById('errorNacionalidad');
+                const pattern = /^[A-Za-zÀ-ÿ\s]+$/;
+                
+                if (this.value.length > 0 && (this.value.length < 3 || !pattern.test(this.value))) {
+                    this.classList.add('is-invalid');
+                    errorNacionalidad.classList.add('show');
+                } else {
+                    this.classList.remove('is-invalid');
+                    errorNacionalidad.classList.remove('show');
+                }
+            });
+
+            // Evento de cambio de club
+            club.addEventListener('change', function() {
+                actualizarClubPreview();
+                actualizarVistaPrevia();
+            });
+
+            // Capitalizar primera letra automáticamente
+            function capitalizarPrimeraLetra(input) {
+                if (input.value.length > 0) {
+                    input.value = input.value.charAt(0).toUpperCase() + input.value.slice(1);
+                }
+            }
+
+            nombre.addEventListener('blur', function() { capitalizarPrimeraLetra(this); });
+            apellido.addEventListener('blur', function() { capitalizarPrimeraLetra(this); });
+            nacionalidad.addEventListener('blur', function() { capitalizarPrimeraLetra(this); });
+
+            // Inicializar contadores si hay valores (modo edición)
+            if (nombre.value) {
+                actualizarContador(nombre, 'charCounterNombre', 100);
+            }
+            if (apellido.value) {
+                actualizarContador(apellido, 'charCounterApellido', 100);
+            }
+            if (nacionalidad.value) {
+                actualizarContador(nacionalidad, 'charCounterNacionalidad', 100);
+            }
+            actualizarVistaPrevia();
+            actualizarClubPreview();
+
+            // Botón limpiar
+            btnLimpiar.addEventListener('click', function(e) {
+                if (confirm('¿Está seguro de limpiar todos los campos del formulario?')) {
+                    vistaPrevia.style.display = 'none';
+                    clubPreview.style.display = 'none';
+                    document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                    document.querySelectorAll('.error-message.show').forEach(el => el.classList.remove('show'));
+                    
+                    // Resetear contadores
+                    document.getElementById('charCountNombre').textContent = '0';
+                    document.getElementById('charCountApellido').textContent = '0';
+                    document.getElementById('charCountNacionalidad').textContent = '0';
+                } else {
+                    e.preventDefault();
+                }
+            });
+
+            // Validación al enviar formulario
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+                const pattern = /^[A-Za-zÀ-ÿ\s]+$/;
+                
+                // Validar nombre
+                if (nombre.value.length < 2 || !pattern.test(nombre.value)) {
+                    nombre.classList.add('is-invalid');
+                    document.getElementById('errorNombre').classList.add('show');
+                    isValid = false;
+                }
+                
+                // Validar apellido
+                if (apellido.value.length < 2 || !pattern.test(apellido.value)) {
+                    apellido.classList.add('is-invalid');
+                    document.getElementById('errorApellido').classList.add('show');
+                    isValid = false;
+                }
+                
+                // Validar edad
+                const edadValue = parseInt(edad.value);
+                if (!edad.value || edadValue < 25 || edadValue > 85) {
+                    edad.classList.add('is-invalid');
+                    document.getElementById('errorEdad').classList.add('show');
+                    isValid = false;
+                }
+                
+                // Validar nacionalidad
+                if (nacionalidad.value.length < 3 || !pattern.test(nacionalidad.value)) {
+                    nacionalidad.classList.add('is-invalid');
+                    document.getElementById('errorNacionalidad').classList.add('show');
+                    isValid = false;
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Por favor corrija los errores en el formulario antes de guardar.');
+                    return false;
+                }
+
+                // Confirmar guardado
+                const nombreCompleto = nombre.value + ' ' + apellido.value;
+                const clubNombre = club.value ? club.options[club.selectedIndex].text : 'ningún club';
+                const accion = document.querySelector('input[name="id"]').value ? 'actualizar' : 'registrar';
+                const confirmMsg = `¿Está seguro de ${accion} al entrenador "${nombreCompleto}" (${nacionalidad.value}) ${club.value ? 'en el club ' + clubNombre : 'sin club asignado'}?`;
+                
+                if (!confirm(confirmMsg)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Prevenir espacios múltiples
+            [nombre, apellido, nacionalidad].forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/\s{2,}/g, ' ');
+                });
+            });
+
+            // Prevenir caracteres no permitidos en tiempo real
+            [nombre, apellido, nacionalidad].forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    const char = String.fromCharCode(e.which);
+                    const pattern = /^[A-Za-zÀ-ÿ\s]$/;
+                    if (!pattern.test(char)) {
+                        e.preventDefault();
+                    }
+                });
+            });
+
+            // Validación de edad en tiempo real (solo números)
+            edad.addEventListener('keypress', function(e) {
+                const char = String.fromCharCode(e.which);
+                if (!/[0-9]/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

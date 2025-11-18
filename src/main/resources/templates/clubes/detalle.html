@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">Detalle del Club</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+        }
+        .card-custom {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+        }
+        .club-header {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px 10px 0 0;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+        .info-value {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card i {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+        .stat-card p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        .jugador-item {
+            border-left: 4px solid #3498db;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background-color: #f8f9fa;
+            border-radius: 0.25rem;
+            transition: all 0.2s;
+        }
+        .jugador-item:hover {
+            background-color: #e9ecef;
+            transform: translateX(5px);
+        }
+        .competicion-item {
+            border-left: 4px solid #f39c12;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background-color: #fff9e6;
+            border-radius: 0.25rem;
+        }
+        .entrenador-card {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+        .asociacion-card {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+        .badge-custom {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        .timeline-item {
+            border-left: 3px solid #3498db;
+            padding-left: 1.5rem;
+            padding-bottom: 1rem;
+            position: relative;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 0;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background-color: #3498db;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #95a5a6;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .section-title {
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .action-buttons {
+            position: sticky;
+            top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="fas fa-futbol me-2"></i>Sistema de Fútbol
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" th:href="@{/}">Inicio</a>
+                <a class="nav-link" th:href="@{/asociaciones}">Asociaciones</a>
+                <a class="nav-link" th:href="@{/clubes}">Clubes</a>
+                <a class="nav-link" th:href="@{/jugadores}">Jugadores</a>
+                <a class="nav-link" th:href="@{/entrenadores}">Entrenadores</a>
+                <a class="nav-link" th:href="@{/competiciones}">Competiciones</a>
+                <a class="nav-link" th:href="@{/h2-console}" target="_blank">Base de Datos</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Header del Club -->
+        <div class="card card-custom mb-4">
+            <div class="club-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="mb-2">
+                            <i class="fas fa-shield-alt me-3"></i>
+                            <span th:text="${club.nombre}">Nombre del Club</span>
+                        </h1>
+                        <p class="mb-0 h5">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            <span th:text="${club.ciudad != null ? club.ciudad : 'Ciudad no especificada'}">Ciudad</span>
+                        </p>
+                    </div>
+                    <div class="text-end">
+                        <a th:href="@{/clubes}" class="btn btn-light btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Volver
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-hashtag me-1"></i>ID del Club
+                        </div>
+                        <div class="info-value">
+                            <span class="badge bg-secondary badge-custom" th:text="${club.id}">1</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-calendar me-1"></i>Año de Fundación
+                        </div>
+                        <div class="info-value">
+                            <span th:if="${club.anioFundacion != null}">
+                                <strong th:text="${club.anioFundacion}">1946</strong>
+                                <span class="text-muted ms-2">
+                                    (<span th:text="${#temporals.year(#temporals.createNow()) - club.anioFundacion}">0</span> años de historia)
+                                </span>
+                            </span>
+                            <span th:if="${club.anioFundacion == null}" class="text-muted">
+                                No especificado
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas Principales -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="stat-card" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                    <i class="fas fa-users"></i>
+                    <h3 th:text="${totalJugadores != null ? totalJugadores : (club.jugadores != null ? club.jugadores.size() : 0)}">0</h3>
+                    <p>Jugadores</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                    <i class="fas fa-user-tie"></i>
+                    <h3 th:text="${club.entrenador != null ? '1' : '0'}">0</h3>
+                    <p>Entrenador</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                    <i class="fas fa-trophy"></i>
+                    <h3 th:text="${club.competiciones != null ? club.competiciones.size() : 0}">0</h3>
+                    <p>Competiciones</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                    <i class="fas fa-building"></i>
+                    <h3 th:text="${club.asociacion != null ? '1' : '0'}">0</h3>
+                    <p>Asociación</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="row">
+            <!-- Columna Principal -->
+            <div class="col-lg-8">
+                <!-- Entrenador -->
+                <div class="card card-custom mb-4">
+                    <div class="card-body">
+                        <h4 class="section-title">
+                            <i class="fas fa-user-tie me-2"></i>
+                            Entrenador (Relación @OneToOne)
+                        </h4>
+                        
+                        <div th:if="${club.entrenador != null}">
+                            <div class="entrenador-card">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5 class="mb-3">
+                                            <i class="fas fa-user-circle me-2"></i>
+                                            <span th:text="${club.entrenador.nombre + ' ' + club.entrenador.apellido}">Nombre Completo</span>
+                                        </h5>
+                                        <p class="mb-2">
+                                            <i class="fas fa-flag me-2"></i>
+                                            <strong>Nacionalidad:</strong> 
+                                            <span th:text="${club.entrenador.nacionalidad}">País</span>
+                                        </p>
+                                        <p class="mb-2">
+                                            <i class="fas fa-birthday-cake me-2"></i>
+                                            <strong>Edad:</strong> 
+                                            <span th:text="${club.entrenador.edad}">0</span> años
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <i class="fas fa-clipboard-list fa-4x mb-2" style="opacity: 0.3;"></i>
+                                        <p class="mb-0 small">Director Técnico</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div th:if="${club.entrenador == null}" class="empty-state">
+                            <i class="fas fa-user-slash"></i>
+                            <h5>Sin Entrenador Asignado</h5>
+                            <p>Este club aún no tiene un entrenador designado</p>
+                            <a th:href="@{/clubes/editar/{id}(id=${club.id})}" class="btn btn-primary-custom text-white">
+                                <i class="fas fa-plus me-2"></i>Asignar Entrenador
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jugadores -->
+                <div class="card card-custom mb-4">
+                    <div class="card-body">
+                        <h4 class="section-title">
+                            <i class="fas fa-users me-2"></i>
+                            Plantel de Jugadores (Relación @OneToMany)
+                        </h4>
+                        
+                        <div th:if="${club.jugadores != null and !club.jugadores.empty}">
+                            <div class="row">
+                                <div th:each="jugador : ${club.jugadores}" class="col-md-6 mb-2">
+                                    <div class="jugador-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    <i class="fas fa-user me-2 text-primary"></i>
+                                                    <span th:text="${jugador.nombre + ' ' + jugador.apellido}">Nombre</span>
+                                                </h6>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-hashtag me-1"></i>
+                                                    <span th:text="${jugador.numero}">0</span>
+                                                    <span class="mx-2">|</span>
+                                                    <i class="fas fa-running me-1"></i>
+                                                    <span th:text="${jugador.posicion}">Posición</span>
+                                                </small>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-primary" th:text="${jugador.numero}">10</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info mt-3" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Total: <strong th:text="${club.jugadores.size()}">0</strong> jugadores en el plantel
+                            </div>
+                        </div>
+                        
+                        <div th:if="${club.jugadores == null or club.jugadores.empty}" class="empty-state">
+                            <i class="fas fa-users-slash"></i>
+                            <h5>Sin Jugadores</h5>
+                            <p>Este club aún no tiene jugadores registrados en su plantel</p>
+							<a th:href="@{/clubes/{id}/agregar-jugadores(id=${club.id})}" class="btn btn-primary-custom text-white">
+							    <i class="fas fa-plus me-2"></i>Agregar Jugadores al Club
+							</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Competiciones -->
+                <div class="card card-custom mb-4">
+                    <div class="card-body">
+                        <h4 class="section-title">
+                            <i class="fas fa-trophy me-2"></i>
+                            Competiciones (Relación @ManyToMany)
+                        </h4>
+                        
+                        <div th:if="${club.competiciones != null and !club.competiciones.empty}">
+                            <div th:each="competicion, iter : ${club.competiciones}" class="competicion-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-2">
+                                            <i class="fas fa-trophy me-2 text-warning"></i>
+                                            <span th:text="${competicion.nombre}">Nombre Competición</span>
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <small class="d-block mb-1">
+                                                    <i class="fas fa-calendar-alt me-1 text-success"></i>
+                                                    <strong>Inicio:</strong> 
+                                                    <span th:text="${#temporals.format(competicion.fechaInicio, 'dd/MM/yyyy')}">01/01/2024</span>
+                                                </small>
+                                                <small class="d-block">
+                                                    <i class="fas fa-calendar-check me-1 text-danger"></i>
+                                                    <strong>Fin:</strong> 
+                                                    <span th:text="${#temporals.format(competicion.fechaFin, 'dd/MM/yyyy')}">31/12/2024</span>
+                                                </small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <small class="d-block">
+                                                    <i class="fas fa-dollar-sign me-1 text-warning"></i>
+                                                    <strong>Premio:</strong> 
+                                                    <span class="badge bg-warning text-dark">
+                                                        $<span th:text="${#numbers.formatInteger(competicion.montoPremio, 0, 'COMMA')}">0</span>
+                                                    </span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-primary badge-custom" th:text="${iter.index + 1}">1</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-success mt-3" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Participando en <strong th:text="${club.competiciones.size()}">0</strong> competiciones activas
+                            </div>
+                        </div>
+                        
+                        <div th:if="${club.competiciones == null or club.competiciones.empty}" class="empty-state">
+                            <i class="fas fa-trophy"></i>
+                            <h5>Sin Competiciones</h5>
+                            <p>Este club no está participando en ninguna competición actualmente</p>
+                            <a th:href="@{/clubes/editar/{id}(id=${club.id})}" class="btn btn-primary-custom text-white">
+                                <i class="fas fa-plus me-2"></i>Agregar a Competición
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Lateral -->
+            <div class="col-lg-4">
+                <!-- Botones de Acción -->
+                <div class="card card-custom mb-4 action-buttons">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-cog me-2"></i>Acciones
+                        </h5>
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/clubes/editar/{id}(id=${club.id})}" class="btn btn-warning">
+                                <i class="fas fa-edit me-2"></i>Editar Club
+                            </a>
+                            <a th:href="@{/jugadores/nuevo}" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-2"></i>Agregar Jugador
+                            </a>
+                            <a th:href="@{/clubes}" class="btn btn-secondary">
+                                <i class="fas fa-list me-2"></i>Ver Todos los Clubes
+                            </a>
+                            <form th:action="@{/clubes/eliminar/{id}(id=${club.id})}" 
+                                  method="get" 
+                                  onsubmit="return confirm('¿Estás seguro de eliminar este club? Esta acción no se puede deshacer.')">
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="fas fa-trash me-2"></i>Eliminar Club
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Asociación -->
+                <div class="card card-custom mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-building me-2"></i>Asociación (Relación @ManyToOne)
+                        </h5>
+                        
+                        <div th:if="${club.asociacion != null}">
+                            <div class="asociacion-card">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-globe me-2"></i>
+                                    <span th:text="${club.asociacion.nombre}">Nombre Asociación</span>
+                                </h6>
+                                <p class="mb-2">
+                                    <i class="fas fa-flag me-2"></i>
+                                    <strong>País:</strong> 
+                                    <span th:text="${club.asociacion.pais}">País</span>
+                                </p>
+                                <p class="mb-0">
+                                    <i class="fas fa-user-tie me-2"></i>
+                                    <strong>Presidente:</strong> 
+                                    <span th:text="${club.asociacion.presidente}">Nombre</span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div th:if="${club.asociacion == null}">
+                            <div class="alert alert-warning" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Sin asociación asignada
+                            </div>
+                            <a th:href="@{/clubes/editar/{id}(id=${club.id})}" class="btn btn-sm btn-primary-custom text-white w-100">
+                                <i class="fas fa-plus me-2"></i>Asignar Asociación
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Adicional -->
+                <div class="card card-custom mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-info-circle me-2"></i>Información
+                        </h5>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-database me-2 text-primary"></i>
+                                <strong>ID:</strong> <span th:text="${club.id}">1</span>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-shield-alt me-2 text-success"></i>
+                                <strong>Nombre:</strong> <span th:text="${club.nombre}">Club</span>
+                            </li>
+                            <li class="mb-2" th:if="${club.ciudad != null}">
+                                <i class="fas fa-map-marker-alt me-2 text-danger"></i>
+                                <strong>Ciudad:</strong> <span th:text="${club.ciudad}">Ciudad</span>
+                            </li>
+                            <li class="mb-2" th:if="${club.anioFundacion != null}">
+                                <i class="fas fa-calendar me-2 text-warning"></i>
+                                <strong>Fundación:</strong> <span th:text="${club.anioFundacion}">1946</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Resumen de Relaciones JPA -->
+                <div class="card card-custom">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-project-diagram me-2"></i>Relaciones JPA
+                        </h5>
+                        <div class="timeline-item">
+                            <h6 class="mb-1">@OneToOne</h6>
+                            <small class="text-muted">
+                                <span th:text="${club.entrenador != null ? '1 Entrenador' : 'Sin entrenador'}">Estado</span>
+                            </small>
+                        </div>
+                        <div class="timeline-item">
+                            <h6 class="mb-1">@OneToMany</h6>
+                            <small class="text-muted">
+                                <span th:text="${club.jugadores != null ? club.jugadores.size() + ' Jugadores' : 'Sin jugadores'}">Estado</span>
+                            </small>
+                        </div>
+                        <div class="timeline-item">
+                            <h6 class="mb-1">@ManyToOne</h6>
+                            <small class="text-muted">
+                                <span th:text="${club.asociacion != null ? '1 Asociación' : 'Sin asociación'}">Estado</span>
+                            </small>
+                        </div>
+                        <div class="timeline-item" style="border-left: 3px solid #f39c12;">
+                            <h6 class="mb-1">@ManyToMany</h6>
+                            <small class="text-muted">
+                                <span th:text="${club.competiciones != null ? club.competiciones.size() + ' Competiciones' : 'Sin competiciones'}">Estado</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container text-center">
+            <p class="mb-0">
+                <i class="fas fa-futbol me-2"></i>
+                Sistema de Gestión de Fútbol &copy; 2024
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Animación de entrada para las tarjetas
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card-custom');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'all 0.5s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 50);
+                }, index * 100);
+            });
+
+            // Imprimir información del club en consola
+            console.log('📊 Detalle del Club cargado');
+            console.log('🏆 Información completa disponible');
+        });
+
+        // Función para imprimir la página
+        function imprimirDetalle() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
